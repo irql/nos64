@@ -99,10 +99,6 @@ start:
       jb .build_page_table
     pop di ; di should still point to the PLM4
 
-    ; Load a zero-length IDT so that any NMI causes a triple-fault
-    cli
-    lidt [IDT]
-
     ; Set the PAE and PGE bit
     mov eax, 10100000b
     mov cr4, eax
@@ -131,10 +127,6 @@ start:
     jmp 0x0008:landing64
 
 align 4
-IDT: ; Interrupt Descriptor Table
-  .Length dw 0
-  .Base   dd 0
-
 GDT: ; Global Descriptor Table
   dq 0
   dq 0x00209A0000000000
@@ -166,6 +158,7 @@ dw 0xbeef ; Checksum
 
 [bits 64]
 landing64:
+  cli
   mov ax, 0x0010
   mov ds, ax
   mov es, ax
