@@ -10,9 +10,7 @@ start:
   ; If we make SP anywhere within the image, then it will
   ; be overwritten when we load the disk to 0x7c00
   mov sp, end
-  mov si, load_1
-    call print_str
-
+  mov bp, sp
   mov cx, SECTORS - 1
   mov bx, RELOC
   mov si, 1
@@ -49,6 +47,14 @@ start:
       call print_str
     jmp .halt
   .data_ok:
+
+    ; Next, probe memory
+    xor ax, ax
+    mov es, ax
+    mov di, 0x7000 ; Store the actual memory entries here
+      call do_e820
+    mov [0x6FF0], bp ; Store the number of entries here
+
     xor ax, ax
     mov ss, ax
     mov sp, start
@@ -146,9 +152,10 @@ print_str:
   .1:
   ret
 
-error_1 db 'Failed to read disk.',0
-error_2 db 'Disk is corrupt.',0
-load_1 db 'Loading',10,13,0
+%include "e820.asm"
+
+error_1 db 'Error reading disk.',0
+error_2 db 'Disk corrupt.',0
 dot db '.',0
 
 times 510 - ($ - $$) db 0
@@ -159,6 +166,7 @@ dw 0xbeef ; Checksum
 [bits 64]
 landing64:
   cli
+  mov rsp, RELOC ; We can safely reclaim the bootloader memory at this point
   mov ax, 0x0010
   mov ds, ax
   mov es, ax
@@ -168,9 +176,9 @@ landing64:
 
   ; Video memory is 0xB8FA0 - 0xB8000 = 0xFA0 = 80 * 25 * 2
   mov rdi, 0xB8000
-  mov rcx, 500
-  mov rax, 0x5f205f205f205f20 ; ' ' with purple background
-  rep stosq
+  ;mov rcx, 500
+  ;mov rax, 0x5f205f205f205f20 ; ' ' with purple background
+  ;rep stosq
 
   mov bx, 0
   call update_cursor
