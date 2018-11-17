@@ -1,5 +1,28 @@
+PRINT_DELAY equ 0x20000
 video_memory equ 0xB8000
 dump_registers_di_offset equ video_memory
+
+; Modifies rdi
+print_newline:
+  push rdx
+  push rax
+  push rbx
+    xor edx, edx
+    mov rax, rdi
+    sub rax, 0xB8000
+    mov ebx, 0xA0
+    div ebx
+    mov rax, 0xA0
+    sub eax, edx
+    add rdi, rax
+    mov rbx, rdi
+    sub rbx, 0xB8000
+    shr rbx, 1
+      call update_cursor
+  pop rbx
+  pop rax
+  pop rdx
+  ret
 
 ; rdi = Buffer (modified/incremented)
 ; rsi = String (null terminated)
@@ -8,18 +31,32 @@ print64:
   push rbx
   push rax
   push rcx
+  push rdx
+  xor rax, rax
     .start:
       lodsb
       or al, al
         jz .done
+      cmp al, 10
+        jne .normal
+          call print_newline
+          jmp .update_cursor
+      .normal:
       or ax, 0x5f00
       stosw
+      push rcx
+        mov rcx, PRINT_DELAY
+        .loop: nop
+        loop .loop
+      pop rcx
+      .update_cursor:
       mov rbx, rdi
       sub rbx, 0xB8000
       shr rbx, 1
         call update_cursor
     jmp .start
   .done:
+  pop rdx
   pop rcx
   pop rax
   pop rbx
@@ -96,6 +133,8 @@ print_character_map:
 ; Used by the other printhex* calls
 ; rcx = number of bytes to dump from rax (zero'd)
 _printhex:
+  push rbx
+
   push rax
     mov eax, 0x5f785f30 ; '0x'
     stosd
@@ -124,6 +163,15 @@ _printhex:
             add al, 0x30
             mov ah, 0x5f
             stosw
+            mov rbx, rdi
+            sub rbx, 0xB8000
+            shr rbx, 1
+              call update_cursor
+            push rcx
+              mov rcx, PRINT_DELAY
+              .loop: nop
+              loop .loop
+            pop rcx
         pop ax
         shr al, 4
       loop .4
@@ -131,11 +179,6 @@ _printhex:
     pop rax
   loop .1
 
-  push rbx
-    mov rbx, rdi
-    sub rbx, 0xB8000
-    shr rbx, 1
-      call update_cursor
   pop rbx
   ret
 
