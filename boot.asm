@@ -187,12 +187,12 @@ landing64:
 
   call dump_memory
 
-  mov rcx, 0x5000000
-  .1: loop .1
+  ;mov rcx, 0x5000000
+  ;.1: loop .1
   ; Shutdown the system (requires -device isa-debug-exit,iobase=0xf4,iosize=0x04 /w/ QEMU)
-  mov dx, 0xf4
-  xor al, al
-  out dx, al
+  ;mov dx, 0xf4
+  ;xor al, al
+  ;out dx, al
   
   .halt:
     pause

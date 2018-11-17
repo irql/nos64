@@ -297,6 +297,7 @@ dump_eflags db 'FLAG:', 0
 
 dump_memory:
   xor rcx, rcx
+  xor rbx, rbx
   mov cx, [MEM_MAP_LEN]
   mov rdx, MEM_MAP
   .1:
@@ -309,6 +310,7 @@ dump_memory:
     mov eax, [rdx + 16]
     cmp eax, 1
     jne .2
+      add rbx, [rdx + 8]
       mov rsi, dump_mem_free
       call print64
     .2:
@@ -337,6 +339,9 @@ dump_memory:
   dec rcx
   test rcx, rcx
   jnz .1
+
+  mov rax, rbx
+    call printhex64
   ret
 
 dump_mem_free db 'Free',0
