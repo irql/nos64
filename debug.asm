@@ -1,5 +1,5 @@
 video_memory equ 0xB8000
-dump_registers_di_offset equ video_memory + 20
+dump_registers_di_offset equ video_memory
 
 ; rdi = Buffer (modified/incremented)
 ; rsi = String (null terminated)
@@ -18,9 +18,6 @@ print64:
       sub rbx, 0xB8000
       shr rbx, 1
         call update_cursor
-      mov rcx, 0x100000
-    .1: nop
-    loop .1
     jmp .start
   .done:
   pop rcx
@@ -237,7 +234,7 @@ dump_registers:
     mov rsi, dump_rsp
       call print64
     mov rax, rsp
-    sub rax, 3 * 8 ; All the values we put on the stack
+    sub rax, 3 * 8 ; Subtract all the values we put on the stack
       call printhex64
 
     mov rdi, dump_registers_di_offset + 0x172
@@ -301,6 +298,10 @@ dump_memory:
   mov cx, [MEM_MAP_LEN]
   mov rdx, MEM_MAP
   .1:
+    mov al, byte [MEM_MAP_LEN]
+    sub al, cl
+      call printhex8
+    add rdi, 2
     mov rax, [rdx]
       call printhex64
     add rdi, 2
@@ -335,7 +336,7 @@ dump_memory:
       call print64
     .6:
     add rdx, 24
-    add rdi, 76
+    add rdi, 66
   dec rcx
   test rcx, rcx
   jnz .1
