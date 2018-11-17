@@ -294,3 +294,53 @@ dump_gs  db ' GS: ', 0
 dump_ss  db ' SS: ', 0
 
 dump_eflags db 'FLAG:', 0
+
+dump_memory:
+  xor rcx, rcx
+  mov cx, [MEM_MAP_LEN]
+  mov rdx, MEM_MAP
+  .1:
+    mov rax, [rdx]
+      call printhex64
+    add rdi, 2
+    mov rax, [rdx + 8]
+      call printhex64
+    add rdi, 2
+    mov eax, [rdx + 16]
+    cmp eax, 1
+    jne .2
+      mov rsi, dump_mem_free
+      call print64
+    .2:
+    cmp eax, 2
+    jne .3
+      mov rsi, dump_mem_reserved
+      call print64
+    .3:
+    cmp eax, 3
+    jne .4
+      mov rsi, dump_mem_acpi_reclaim
+      call print64
+    .4:
+    cmp eax, 4
+    jne .5
+      mov rsi, dump_mem_acpi_nvs
+      call print64
+    .5:
+    cmp eax, 5
+    jne .6
+      mov rsi, dump_mem_bad
+      call print64
+    .6:
+    add rdx, 24
+    add rdi, 76
+  dec rcx
+  test rcx, rcx
+  jnz .1
+  ret
+
+dump_mem_free db 'Free',0
+dump_mem_reserved db 'Resv',0
+dump_mem_acpi_reclaim db 'ACPI Reclaimable',0
+dump_mem_acpi_nvs db 'ACPI NVS',0
+dump_mem_bad db 'Bad',0

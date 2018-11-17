@@ -1,8 +1,10 @@
 [bits 16]
 [org 0x7c00]
 
-%define SECTORS 4
-%define RELOC 0x7c00
+SECTORS equ 5
+RELOC equ 0x7c00
+MEM_MAP equ 0x7000
+MEM_MAP_LEN equ 0x6FF0
 
 jmp 0x0000:start ; Set CS to 0
 
@@ -51,9 +53,9 @@ start:
     ; Next, probe memory
     xor ax, ax
     mov es, ax
-    mov di, 0x7000 ; Store the actual memory entries here
+    mov di, MEM_MAP ; Store the actual memory entries here
       call do_e820
-    mov [0x6FF0], bp ; Store the number of entries here
+    mov [MEM_MAP_LEN], bp ; Store the number of entries here
 
     xor ax, ax
     mov ss, ax
@@ -183,7 +185,7 @@ landing64:
   mov bx, 0
   call update_cursor
 
-  call dump_registers
+  call dump_memory
 
   mov rcx, 0x5000000
   .1: loop .1
