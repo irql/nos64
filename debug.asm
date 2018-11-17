@@ -1,12 +1,11 @@
-PRINT_DELAY equ 0x20000
-video_memory equ 0xB8000
+PRINT_DELAY              equ 0x20000
+video_memory             equ 0xB8000
 dump_registers_di_offset equ video_memory
 
 ; Modifies rdi
 print_newline:
   push rdx
   push rax
-  push rbx
     xor edx, edx
     mov rax, rdi
     sub rax, 0xB8000
@@ -15,11 +14,7 @@ print_newline:
     mov rax, 0xA0
     sub eax, edx
     add rdi, rax
-    mov rbx, rdi
-    sub rbx, 0xB8000
-    shr rbx, 1
-      call update_cursor
-  pop rbx
+    call update_cursor
   pop rax
   pop rdx
   ret
@@ -28,7 +23,6 @@ print_newline:
 ; rsi = String (null terminated)
 print64:
   push rsi
-  push rbx
   push rax
   push rcx
   push rdx
@@ -50,24 +44,32 @@ print64:
         loop .loop
       pop rcx
       .update_cursor:
-      mov rbx, rdi
-      sub rbx, 0xB8000
-      shr rbx, 1
         call update_cursor
     jmp .start
   .done:
   pop rdx
   pop rcx
   pop rax
-  pop rbx
   pop rsi
   ret
 
 ; bx = index into video memory to drop cursor (max 0x7CF = 80 * 25 - 1)
+; resets rdi if it grows beyond video memory (0xB8FA0)
 update_cursor:
   push dx
   push ax
   push bx
+    cmp rdi, 0xB8FA0
+    jl .1
+      xor bx, bx
+      mov rdi, 0xB8000
+    .1:
+
+    ; calculate bx based on di
+    mov bx, di
+    sub bx, 0x8000
+    shr bx, 1
+
     ; Select cursor low port
     mov dx, 0x3D4
     mov al, 0x0F
@@ -144,12 +146,8 @@ _printhex:
     push rax
     push rcx
       dec rcx
-      and rcx, rcx
-      jz .6
-        .5:
-          shr rax, 8
-        loop .5
-      .6:
+      shl cl, 3
+      shr rax, cl
       mov rcx, 2
       rol al, 4
       .4:
@@ -163,10 +161,7 @@ _printhex:
             add al, 0x30
             mov ah, 0x5f
             stosw
-            mov rbx, rdi
-            sub rbx, 0xB8000
-            shr rbx, 1
-              call update_cursor
+            call update_cursor
             push rcx
               mov rcx, PRINT_DELAY
               .loop: nop

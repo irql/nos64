@@ -11,6 +11,9 @@ memory_globals:
   .mem_size dq 0
   .tbl_size dq 0
 
+PMEM_TBL_BASE equ memory_globals.mem_base
+PMEM_TBL_SIZE equ memory_globals.tbl_size
+
 ; Does not save any register states
 memory_init:
   push rdi
@@ -38,7 +41,12 @@ memory_init:
         mov rax, r9
         mov rbx, 256 * 64 ; Each bit in a qword corresponds to one 256 byte region
         div rbx
-        mov [memory_globals.tbl_size], rax
+        mov [PMEM_TBL_SIZE], rax
+
+        mov rcx, rax
+        xor rax, rax
+        mov rdi, [PMEM_TBL_BASE]
+        rep stosq
 
         pop rdi
         mov rsi, .s_notice
@@ -61,5 +69,43 @@ memory_init:
   .s_notice db 'MEMORY BASE: ',0
   .s_size   db ' SIZE: ',0
 
+; rcx = number of blocks requested (each is 256 bytes)
+; rax is updated to point to the start of the blocks (contiguous region)
 memory_alloc:
+  push r8
+  push rcx
+  push rbx
+  push rsi
+    mov rsi, [PMEM_TBL_BASE]
+    .entry_loop:
+      mov rax, rsi
+      call printhex64
+      call print_newline
+
+      xor rbx, rbx
+      xor rax, rax
+      lodsq
+      not rax
+      .bit_loop:
+        bsf rbx, rax ; Scan rax for lowest-set bit and put index in rbx
+        mov r8, 1
+        push cx
+          mov cl, bl
+          shl r8, cl
+        pop cx
+        xor rax, r8
+        push rax
+          not rax
+          call printhex64
+          add rdi, 2
+          mov rax, rcx
+          call printhex64
+          call print_newline
+        pop rax
+        loop .bit_loop
+    ;loop .loop
+  pop rsi
+  pop rbx
+  pop rcx
+  pop r8
   ret
