@@ -7,9 +7,10 @@ MEM_ACPI_NVS equ 4
 MEM_BAD      equ 5
 
 memory_globals:
-  .mem_base dq 0
-  .mem_size dq 0
-  .tbl_size dq 0
+  .mem_base  dq 0
+  .mem_size  dq 0
+  .tbl_size  dq 0
+  .free_base dq 0
 
 PMEM_TBL_BASE equ memory_globals.mem_base
 PMEM_TBL_SIZE equ memory_globals.tbl_size
@@ -43,6 +44,11 @@ memory_init:
         div rbx
         mov [PMEM_TBL_SIZE], rax
 
+        ; free_mem_base is the start of memory following the allocation tables
+        ;mov rcx, r8
+        ;add rcx, rax
+        ;mov [memory_globals.free_base], rcx
+
         mov rcx, rax
         xor rax, rax
         mov rdi, [PMEM_TBL_BASE]
@@ -51,7 +57,7 @@ memory_init:
         pop rdi
         mov rsi, .s_notice
           call print64
-        mov rax, r8
+        mov rax, [memory_globals.free_base]
           call printhex64
         mov rsi, .s_size
           call print64
@@ -85,17 +91,25 @@ memory_alloc:
       xor rbx, rbx
       xor rax, rax
       lodsq
+      ;mov rax, 0x0000000000000010
       not rax
       .bit_loop:
         bsf rbx, rax ; Scan rax for lowest-set bit and put index in rbx
-        mov r8, 1
+
+        ; If indices are not contiguous, start over
+
+        mov r8, 1 ; Create bit mask to xor rax by
         push cx
           mov cl, bl
           shl r8, cl
         pop cx
         xor rax, r8
+
         push rax
           not rax
+          call printhex64
+          add rdi, 2
+          mov rax, rbx
           call printhex64
           add rdi, 2
           mov rax, rcx
