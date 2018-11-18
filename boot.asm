@@ -1,7 +1,7 @@
 [bits 16]
 [org 0x7c00]
 
-SECTORS equ 5
+SECTORS equ 6
 RELOC equ 0x7c00
 MEM_MAP equ 0x7000
 MEM_MAP_LEN equ 0x6FF0
@@ -188,7 +188,7 @@ landing64:
   mov rdi, 0xb8000
   call memory_init
 
-  mov rcx, 10
+  mov rcx, 3
   call memory_alloc
 
   ;call dump_registers

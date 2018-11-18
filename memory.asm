@@ -45,9 +45,9 @@ memory_init:
         mov [PMEM_TBL_SIZE], rax
 
         ; free_mem_base is the start of memory following the allocation tables
-        ;mov rcx, r8
-        ;add rcx, rax
-        ;mov [memory_globals.free_base], rcx
+        mov rcx, r8
+        add rcx, rax
+        mov [memory_globals.free_base], rcx
 
         mov rcx, rax
         xor rax, rax

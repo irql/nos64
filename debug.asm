@@ -6,6 +6,7 @@ dump_registers_di_offset equ video_memory
 print_newline:
   push rdx
   push rax
+  push rbx
     xor edx, edx
     mov rax, rdi
     sub rax, 0xB8000
@@ -15,6 +16,7 @@ print_newline:
     sub eax, edx
     add rdi, rax
     call update_cursor
+  pop rbx
   pop rax
   pop rdx
   ret
@@ -135,7 +137,6 @@ print_character_map:
 ; Used by the other printhex* calls
 ; rcx = number of bytes to dump from rax (zero'd)
 _printhex:
-  push rbx
 
   push rax
     mov eax, 0x5f785f30 ; '0x'
@@ -152,29 +153,26 @@ _printhex:
       rol al, 4
       .4:
         push ax
-          .2:
-            and al, 0x0f
-            cmp al, 0x0a
-            jl .3
-              add al, 0x07
-            .3:
-            add al, 0x30
-            mov ah, 0x5f
-            stosw
-            call update_cursor
-            push rcx
-              mov rcx, PRINT_DELAY
-              .loop: nop
-              loop .loop
-            pop rcx
+          and al, 0x0f
+          cmp al, 0x0a
+          jl .3
+            add al, 0x07
+          .3:
+          add al, 0x30
+          mov ah, 0x5f
+          stosw
+          call update_cursor
+          push rcx
+            mov rcx, PRINT_DELAY
+            .loop: nop
+            loop .loop
+          pop rcx
         pop ax
         shr al, 4
       loop .4
     pop rcx
     pop rax
   loop .1
-
-  pop rbx
   ret
 
 ; ax - value
