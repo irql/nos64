@@ -188,6 +188,8 @@ landing64:
   mov rdi, 0xb8000
   call memory_init
 
+  mov rcx, 64
+  call memory_alloc
   mov rcx, 4
   call memory_alloc
 

@@ -54,10 +54,6 @@ memory_init:
         mov rdi, [PMEM_TBL_BASE]
         rep stosq
 
-        mov rdi, [PMEM_TBL_BASE]
-        mov rcx, 1001110101b
-        mov [rdi], rcx
-
         pop rdi
         mov rsi, .s_notice
           call print64
@@ -91,9 +87,9 @@ memory_alloc:
   push rsi
     mov rsi, [PMEM_TBL_BASE]
     .entry_loop:
-      mov rax, rsi
-      call printhex64
-      call print_newline
+      ;mov rax, rsi
+      ;call printhex64
+      ;call print_newline
 
       xor rbx, rbx
       xor rax, rax
@@ -125,10 +121,10 @@ memory_alloc:
           inc r9
           cmp rbx, r9
           je .is_contig
-            push rsi
-              mov rsi, .s_nocont
-              call print64
-            pop rsi
+            ;push rsi
+            ;  mov rsi, .s_nocont
+            ;  call print64
+            ;pop rsi
             xor r10, r10
             mov rcx, [rsp + 16]
             cmp rax, -1 ; If we've exhausted all the bits in this block, move to the next
@@ -144,24 +140,25 @@ memory_alloc:
         xor rax, r8
         or r10, r8
 
-        push rax
-          not rax
-          call printhex64 ; First column
-          add rdi, 2
-          mov rax, r10
-          call printhex64 ; Second col - bitmask
-          add rdi, 2
-          mov rax, rbx
-          call printhex64 ; Third col - cur bit index
-          add rdi, 2
-          mov rax, rcx
-          call printhex64 ; Fourth col - cur bit scanned
-          call print_newline
-        pop rax
+        ;push rax
+        ;  not rax
+        ;  call printhex64 ; First column
+        ;  add rdi, 2
+        ;  mov rax, r10
+        ;  call printhex64 ; Second col - bitmask
+        ;  add rdi, 2
+        ;  mov rax, rbx
+        ;  call printhex64 ; Third col - cur bit index
+        ;  add rdi, 2
+        ;  mov rax, rcx
+        ;  call printhex64 ; Fourth col - cur bit scanned
+        ;  call print_newline
+        ;pop rax
         dec rcx
         test rcx, rcx
         jnz .bit_loop
 
+        sub rsi, 8
         or [rsi], r10 ; Mark bits in the block as in-use
 
         mov rax, rsi
