@@ -21,29 +21,24 @@ interrupt_init:
   .alloc_ok:
   mov [interrupt_globals.idt_base], rax
 
-  push rdi
-  mov rdi, rax
-  xor rax, rax
-  mov rcx, (256 * 16) / 8
-  rep stosq
-  pop rdi ; Preserve rdi if we want to print anything
+  ;push rdi
+  ;mov rdi, rax
+  ;xor rax, rax
+  ;mov rcx, (256 * 16) / 8
+  ;rep stosq
+  ;pop rdi ; Preserve rdi if we want to print anything
 
   ; Set all interrupts to the same routine by default
-  ;mov rbx, rax
+  mov rbx, rax
 
-  ;mov ax, interrupt_common_handler
-  ;and ax, 0xFFFF
-
-  ;mov dx, interrupt_common_handler
-  ;shr dx, 16
-  ;and dx, 0xFFFF
-
+  mov rax, interrupt_common_handler
+  mov rdx, interrupt_common_handler
+  shr rdx, 16
   .idte_set_loop:
     mov [rbx], ax ; base low
     mov [rbx + 2], word 0x08 ; selector
     mov [rbx + 4], byte 0 ; reserved
-    ;mov [rbx + 5], byte 0x8F ; flags
-    mov [rbx + 5], byte 0
+    mov [rbx + 5], byte 0x8E ; flags
     mov [rbx + 6], dx ; base mid
     mov [rbx + 8], dword 0 ; base high
     mov [rbx + 12], dword 0 ; reserved
@@ -109,6 +104,10 @@ interrupt_init:
   mov al, cl
   out 0xA1, al
 
+  mov rax, interrupt_keyboard
+  mov rbx, 0x21
+  call interrupt_set
+
   ; Load the IDT
   lidt [interrupt_idt_descriptor]
   sti ; Enable interrupts
@@ -116,7 +115,7 @@ interrupt_init:
 
   .s_failed_alloc db 'Failed to allocate memory for IDT.',10,0
 
-; rax = addres of ISR
+; rax = address of ISR
 ; rbx = interrupt number
 interrupt_set:
   push rdx
@@ -125,7 +124,7 @@ interrupt_set:
     shr rdx, 16
 
     shl rbx, 4
-    lea rbx, [interrupt_globals.idt_base + rbx]
+    add rbx, interrupt_globals.idt_base
     mov [rbx], ax
     mov [rbx + 2], word 0x08
     mov [rbx + 4], byte 0
@@ -137,44 +136,39 @@ interrupt_set:
   pop rdx
   ret
 
-;interrupt_keyboard:
-;  mov ax, 0x10
-;  mov ds, ax
-;  in al, 0x60
-;  mov rdi, 0xB8000
-;  call printhex8
-;  iretq
+interrupt_keyboard:
+  push rax
+  mov ax, 0x10
+  mov ds, ax
+  in al, 0x60
+  mov rdi, 0xB8000
+  call printhex8
+  mov al, 0x20
+  out 0x20, al
+  pop rax
+  add rsp, 8
+  iretq
 
 interrupt_common_handler:
-  ;push rax
+  push rax
 
-  ;mov ax, ds
-  ;push ax
-
-  ;mov rax, rsp
-  ;push rax
-  ;mov ax, 0x10
-  ;mov ds, ax
-  ;mov rdi, 0xB8000
-  ;pop rax
-  ;call printhex64
-  ;call print_newline
-  ;mov es, ax
-  ;mov fs, ax
-  ;mov gs, ax
-  ;mov ss, ax
+  mov rax, rsp
+  push rax
+    mov ax, 0x10
+    mov ds, ax
+    mov rdi, 0xB8000
+  pop rax
+  call printhex64
+  call print_newline
 
   ;in al, 0x60
   ;mov rdi, 0xB8000
   ;mov rax, [rsp]
   ;call printhex64
 
-  ;pop bx
-  ;mov ds, bx
-  ;mov es, bx
-  ;mov fs, bx
-  ;mov gs, bx
-  ;mov ss, bx
-
-  ;pop rax
+  pop rax
+  ;jmp landing64.halt
+  ;mov al, 0x20
+  ;out 0x20, al
+  add rsp,8
   iretq
