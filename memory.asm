@@ -167,8 +167,6 @@ memory_alloc:
         shl r11, 8  ; Multiply bit-index by 256
         add rax, r11
         add rax, [memory_globals.free_base] ; Start of free memory (post table)
-        call printhex64
-        call print_newline
       .end:
   pop rsi
   pop rbx
