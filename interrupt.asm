@@ -168,7 +168,7 @@ interrupt_common_handler:
 
   pop rax
   ;jmp landing64.halt
-  ;mov al, 0x20
-  ;out 0x20, al
+  mov al, 0x20
+  out 0x20, al
   add rsp,8
   iretq
