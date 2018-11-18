@@ -68,6 +68,8 @@ interrupt_common_handler:
   mov gs, ax
   mov ss, ax
 
+  in al, 0x60
+  mov rdi, 0xB8000
   call printhex64
 
   pop bx
@@ -79,4 +81,4 @@ interrupt_common_handler:
 
   pop rax
   sti
-  iretq
+  iret
