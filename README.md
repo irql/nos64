@@ -3,7 +3,7 @@
 The 64-bit nanokernel operating system.
 Let's have fun! :-)
 
-## Dependencies
+#### Dependencies
   - nasm
 
 #### How to build
