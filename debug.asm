@@ -1,4 +1,4 @@
-PRINT_DELAY              equ 0x4000
+PRINT_DELAY              equ 0x10000
 video_memory             equ 0xB8000
 dump_registers_di_offset equ video_memory
 

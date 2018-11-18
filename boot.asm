@@ -187,11 +187,7 @@ landing64:
 
   mov rdi, 0xb8000
   call memory_init
-
-  mov rcx, 64
-  call memory_alloc
-  mov rcx, 4
-  call memory_alloc
+  call interrupt_init
 
   ;call dump_registers
   ;mov rdi, 0xB8000 + 0xA0 * 10
@@ -210,6 +206,7 @@ landing64:
 
 %include 'debug.asm'
 %include 'memory.asm'
+%include 'interrupt.asm'
 
 times (SECTORS * 0x200) - ($ - $$) db 0
 end:
