@@ -161,6 +161,17 @@ interrupt_keyboard:
     db 0x08, 0x88, '7', KEY_CHAR
     db 0x09, 0x89, '8', KEY_CHAR
     db 0x0a, 0x8a, '9', KEY_CHAR
+    db 0x0c, 0x8c, '-', KEY_CHAR
+    db 0x0d, 0x8d, '=', KEY_CHAR
+    db 0x1a, 0x9a, '[', KEY_CHAR
+    db 0x1b, 0x9b, ']', KEY_CHAR
+    db 0x2b, 0xab, '\', KEY_CHAR
+    db 0x27, 0xa7, ';', KEY_CHAR
+    db 0x28, 0xa8, 27h, KEY_CHAR
+    db 0x33, 0xb3, ',', KEY_CHAR
+    db 0x34, 0xb4, '.', KEY_CHAR
+    db 0x35, 0xb5, '/', KEY_CHAR
+    db 0x29, 0xa9, '`', KEY_CHAR
     db 0x39, 0xb9, ' ', KEY_CHAR
     db 0x1c, 0x9c,  10, KEY_CHAR
 
@@ -200,10 +211,22 @@ interrupt_keyboard:
     db 0x08, 0x88, '&', KEY_CHAR | KEY_SHIFT
     db 0x09, 0x89, '*', KEY_CHAR | KEY_SHIFT
     db 0x0a, 0x8a, '(', KEY_CHAR | KEY_SHIFT
+    db 0x0c, 0x8c, '_', KEY_CHAR | KEY_SHIFT
+    db 0x0d, 0x8d, '+', KEY_CHAR | KEY_SHIFT
+    db 0x1a, 0x9a, '{', KEY_CHAR | KEY_SHIFT
+    db 0x1b, 0x9b, '}', KEY_CHAR | KEY_SHIFT
+    db 0x2b, 0xab, '|', KEY_CHAR | KEY_SHIFT
+    db 0x27, 0xa7, ':', KEY_CHAR | KEY_SHIFT
+    db 0x28, 0xa8, '"', KEY_CHAR | KEY_SHIFT
+    db 0x33, 0xb3, '<', KEY_CHAR | KEY_SHIFT
+    db 0x34, 0xb4, '>', KEY_CHAR | KEY_SHIFT
+    db 0x35, 0xb5, '?', KEY_CHAR | KEY_SHIFT
     db 0x39, 0xb9, ' ', KEY_CHAR | KEY_SHIFT
+    db 0x29, 0xa9, '~', KEY_CHAR | KEY_SHIFT
     db 0x1c, 0x9c,  10, KEY_CHAR | KEY_SHIFT
 
     db 0x0e, 0x8e,   0, KEY_BACKSPACE
-    db 0x2a, 0xaa,   0, KEY_SHIFT
+    db 0x2a, 0xaa,   0, KEY_SHIFT ; Left shift
+    db 0x36, 0xb6,   0, KEY_SHIFT ; Right shift
     db 0x3a, 0xba,   0, KEY_CAPS
   .sc_tbl_length equ $ - .sc_table

@@ -75,6 +75,9 @@ memory_init:
   .s_notice db 'MEMORY BASE: ',0
   .s_size   db ' SIZE: ',0
 
+; TODO: can only allocate 64 blocks at a time (max of 16k)
+;       because the function does not compute contiguous free
+;       bits at the end of record boundaries.
 ; rcx = number of blocks requested (each is 256 bytes)
 ; rax is updated to point to the start of the blocks (contiguous region)
 memory_alloc:
