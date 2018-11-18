@@ -51,6 +51,9 @@ start:
   .data_ok:
 
     ; Next, probe memory
+    ; It's _VERY_ important that we've read the sectors
+    ; correctly, because the code for `do_e820` resides
+    ; in the second sector of the boot media
     xor ax, ax
     mov es, ax
     mov di, MEM_MAP ; Store the actual memory entries here
@@ -172,16 +175,29 @@ print_str:
   .1:
   ret
 
-%include "e820.asm"
-
 error_1 db 'Error reading disk.',0
 error_2 db 'Disk corrupt.',0
 dot db '.',0
 
-times 510 - ($ - $$) db 0
+times 446 - ($ - $$) db 0
+MBR:
+  .part1:
+    dq 0
+    dq 0
+  .part2:
+    dq 0
+    dq 0
+  .part3:
+    dq 0
+    dq 0
+  .part4:
+    dq 0
+    dq 0
 dw 0xAA55 ; Mark sector as bootable
 ; Start of sector 2
 dw 0xbeef ; Checksum
+
+%include "e820.asm"
 
 [bits 64]
 landing64:
