@@ -206,6 +206,7 @@ landing64:
   mov rdi, 0xB8000
   call memory_init
   call interrupt_init
+  call keyboard_init
 
   ;xor rax, rax
   ;div rax
@@ -228,6 +229,7 @@ landing64:
 %include 'debug.asm'
 %include 'memory.asm'
 %include 'interrupt.asm'
+%include 'devices/keyboard.asm'
 
 times (SECTORS * 0x200) - ($ - $$) db 0
 end:

@@ -55,15 +55,15 @@ memory_init:
         rep stosq
 
         pop rdi
-        ;mov rsi, .s_notice
-        ;  call print64
-        ;mov rax, [memory_globals.free_base]
-        ;  call printhex64
-        ;mov rsi, .s_size
-        ;  call print64
-        ;mov rax, r9
-        ;  call printhex64
-        ;call print_newline
+        mov rsi, .s_notice
+          call print64
+        mov rax, [memory_globals.free_base]
+          call printhex64
+        mov rsi, .s_size
+          call print64
+        mov rax, r9
+          call printhex64
+        call print_newline
         ret
   .2:
   dec rcx

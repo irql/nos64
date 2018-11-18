@@ -11,6 +11,8 @@ interrupt_init:
   ; There are 256 interrupts in the IDT
   ; Each IDT entry is 16 bytes, so we allocate 4096 bytes for the
   ; entire table (16 "pages" where each "page" is 256 bytes)
+  ;
+  ; Obviously, this allocation will never be free'd.
   mov rcx, 16
   call memory_alloc
   test rax, rax
@@ -29,10 +31,6 @@ interrupt_init:
     mov rbx, rcx
     call interrupt_set
   loop .idte_set_loop
-
-  mov rax, interrupt_keyboard
-  mov rbx, 0x21
-  call interrupt_set
 
   ; Remap the PIC prior to loading the IDT
 
@@ -126,12 +124,3 @@ interrupt_set:
 interrupt_common_handler:
   iretq
 
-interrupt_keyboard:
-  push rax
-    in al, 0x60
-    call printhex8
-    add rdi, 2
-    mov al, 0x20
-    out 0x20, al
-  pop rax
-  iretq
