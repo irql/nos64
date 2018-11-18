@@ -21,33 +21,18 @@ interrupt_init:
   .alloc_ok:
   mov [interrupt_globals.idt_base], rax
 
-  ;push rdi
-  ;mov rdi, rax
-  ;xor rax, rax
-  ;mov rcx, (256 * 16) / 8
-  ;rep stosq
-  ;pop rdi ; Preserve rdi if we want to print anything
-
   ; Set all interrupts to the same routine by default
   mov rbx, rax
-
+  mov rcx, 256
   mov rax, interrupt_common_handler
-  mov rdx, interrupt_common_handler
-  shr rdx, 16
   .idte_set_loop:
-    mov [rbx], ax ; base low
-    mov [rbx + 2], word 0x08 ; selector
-    mov [rbx + 4], byte 0 ; reserved
-    mov [rbx + 5], byte 0x8E ; flags
-    mov [rbx + 6], dx ; base mid
-    mov [rbx + 8], dword 0 ; base high
-    mov [rbx + 12], dword 0 ; reserved
-    add rbx, 16
+    mov rbx, rcx
+    call interrupt_set
   loop .idte_set_loop
 
-  ;mov rax, interrupt_keyboard
-  ;mov rbx, 0x21
-  ;call interrupt_set
+  mov rax, interrupt_keyboard
+  mov rbx, 0x21
+  call interrupt_set
 
   ; Remap the PIC prior to loading the IDT
 
@@ -104,9 +89,10 @@ interrupt_init:
   mov al, cl
   out 0xA1, al
 
-  mov rax, interrupt_keyboard
-  mov rbx, 0x21
-  call interrupt_set
+  ; Mask PIT (disable everything but keyboard (IRQ=1, line=2)
+  in al, 0x21
+  or al, ~(2)
+  out 0x21, al
 
   ; Load the IDT
   lidt [interrupt_idt_descriptor]
@@ -124,7 +110,8 @@ interrupt_set:
     shr rdx, 16
 
     shl rbx, 4
-    add rbx, interrupt_globals.idt_base
+    add rbx, [interrupt_globals.idt_base]
+
     mov [rbx], ax
     mov [rbx + 2], word 0x08
     mov [rbx + 4], byte 0
@@ -136,39 +123,15 @@ interrupt_set:
   pop rdx
   ret
 
-interrupt_keyboard:
-  push rax
-  mov ax, 0x10
-  mov ds, ax
-  in al, 0x60
-  mov rdi, 0xB8000
-  call printhex8
-  mov al, 0x20
-  out 0x20, al
-  pop rax
-  add rsp, 8
+interrupt_common_handler:
   iretq
 
-interrupt_common_handler:
+interrupt_keyboard:
   push rax
-
-  mov rax, rsp
-  push rax
-    mov ax, 0x10
-    mov ds, ax
-    mov rdi, 0xB8000
+    in al, 0x60
+    call printhex8
+    add rdi, 2
+    mov al, 0x20
+    out 0x20, al
   pop rax
-  call printhex64
-  call print_newline
-
-  ;in al, 0x60
-  ;mov rdi, 0xB8000
-  ;mov rax, [rsp]
-  ;call printhex64
-
-  pop rax
-  ;jmp landing64.halt
-  mov al, 0x20
-  out 0x20, al
-  add rsp,8
   iretq
