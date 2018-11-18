@@ -1,4 +1,4 @@
-PRINT_DELAY              equ 0x20000
+PRINT_DELAY              equ 0x4000
 video_memory             equ 0xB8000
 dump_registers_di_offset equ video_memory
 
@@ -58,13 +58,22 @@ print64:
 ; bx = index into video memory to drop cursor (max 0x7CF = 80 * 25 - 1)
 ; resets rdi if it grows beyond video memory (0xB8FA0)
 update_cursor:
-  push dx
   push ax
+  push dx
   push bx
     cmp rdi, 0xB8FA0
     jl .1
       xor bx, bx
       mov rdi, 0xB8000
+      push rdi
+      push rax
+      push rcx
+        mov rcx, 2000
+        mov rax, 0x5f205f20
+        rep stosd
+      pop rcx
+      pop rax
+      pop rdi
     .1:
 
     ; calculate bx based on di
@@ -92,8 +101,8 @@ update_cursor:
     inc dx
     out dx, al
   pop bx
-  pop ax
   pop dx
+  pop ax
   ret
 
 ; Does not preserve any registers

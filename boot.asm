@@ -188,7 +188,7 @@ landing64:
   mov rdi, 0xb8000
   call memory_init
 
-  mov rcx, 3
+  mov rcx, 4
   call memory_alloc
 
   ;call dump_registers

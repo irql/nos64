@@ -54,6 +54,10 @@ memory_init:
         mov rdi, [PMEM_TBL_BASE]
         rep stosq
 
+        mov rdi, [PMEM_TBL_BASE]
+        mov rcx, 1001110101b
+        mov [rdi], rcx
+
         pop rdi
         mov rsi, .s_notice
           call print64
@@ -78,7 +82,10 @@ memory_init:
 ; rcx = number of blocks requested (each is 256 bytes)
 ; rax is updated to point to the start of the blocks (contiguous region)
 memory_alloc:
-  push r8
+  push r8  ; bit mask
+  push r9  ; last bit index in bit_loop
+  push r10 ; finalized bitmask
+  push r11 ; index at which allocation started within the block
   push rcx
   push rbx
   push rsi
@@ -90,36 +97,89 @@ memory_alloc:
 
       xor rbx, rbx
       xor rax, rax
+      xor r9, r9
+      xor r10, r10
+
+      ; Check if we've exceeded the bounds of the allocation table
+      mov r11, [PMEM_TBL_BASE]
+      add r11, [PMEM_TBL_SIZE]
+      cmp rsi, r11
+      jle .load_next
+        xor rax, rax
+        jmp .end
+      .load_next:
       lodsq
-      ;mov rax, 0x0000000000000010
       not rax
+      ; TODO: determine if we can fit the allocation in this block prior to bit_loop
       .bit_loop:
         bsf rbx, rax ; Scan rax for lowest-set bit and put index in rbx
 
         ; If indices are not contiguous, start over
+        cmp rcx, [rsp + 16]
+        jne .second_pass
+          mov r9, rbx
+          mov r11, r9
+          jmp .is_contig
 
+        .second_pass:
+          inc r9
+          cmp rbx, r9
+          je .is_contig
+            push rsi
+              mov rsi, .s_nocont
+              call print64
+            pop rsi
+            xor r10, r10
+            mov rcx, [rsp + 16]
+            cmp rax, -1 ; If we've exhausted all the bits in this block, move to the next
+            jge .entry_loop
+            jmp .bit_loop
+
+        .is_contig:
         mov r8, 1 ; Create bit mask to xor rax by
         push cx
           mov cl, bl
           shl r8, cl
         pop cx
         xor rax, r8
+        or r10, r8
 
         push rax
           not rax
-          call printhex64
+          call printhex64 ; First column
+          add rdi, 2
+          mov rax, r10
+          call printhex64 ; Second col - bitmask
           add rdi, 2
           mov rax, rbx
-          call printhex64
+          call printhex64 ; Third col - cur bit index
           add rdi, 2
           mov rax, rcx
-          call printhex64
+          call printhex64 ; Fourth col - cur bit scanned
           call print_newline
         pop rax
-        loop .bit_loop
-    ;loop .loop
+        dec rcx
+        test rcx, rcx
+        jnz .bit_loop
+
+        or [rsi], r10 ; Mark bits in the block as in-use
+
+        mov rax, rsi
+        sub rax, [PMEM_TBL_BASE]
+        shl rax, 11 ; Multiply entry-index by 2048 (256 * 8)
+        shl r11, 8  ; Multiply bit-index by 256
+        add rax, r11
+        add rax, [memory_globals.free_base] ; Start of free memory (post table)
+        call printhex64
+        call print_newline
+      .end:
   pop rsi
   pop rbx
   pop rcx
+  pop r11
+  pop r10
+  pop r9
   pop r8
   ret
+  .s_nocont db 'Not contiguous.',10,0
+  .s_toosmall db 'Not enough bits.',10,0
