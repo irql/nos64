@@ -19,7 +19,7 @@ start:
   .load_loop:
     push cx
       mov cx, si
-      mov ah, 2 ; Read in CHS mode
+      mov ah, 2 ; Read in CHS mode (I could never get LBA to work in QEMU)
       mov al, 1 ; Sectors
       mov ch, 0 ; Cylinder
       mov dh, 0 ; Head

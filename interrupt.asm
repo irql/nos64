@@ -51,17 +51,17 @@ interrupt_init:
   xor al, al
   out 0x80, al
 
-  mov al, 0x20 ; New master PVO
+  mov al, 0x20 ; New master interrupt descriptor offset
   out 0x21, al
   xor al, al
   out 0x80, al
 
-  mov al, 0x30 ; New slave PVO
+  mov al, 0x30 ; New slave interrupt descriptor offset
   out 0xA1, al
   xor al, al
   out 0x80, al
 
-  mov al, 4    ; Tell the master there is a slave at IRQ2
+  mov al, 0100b; Tell the master there is a slave at IRQ2
   out 0x21, al
   xor al, al
   out 0x80, al
@@ -71,12 +71,12 @@ interrupt_init:
   xor al, al
   out 0x80, al
 
-  mov al, 1    ; 8086 mode
+  mov al, 1    ; master = 8086 mode
   out 0x21, al
   xor al, al
   out 0x80, al
 
-  mov al, 1    ; 8086 mode
+  mov al, 1    ; slave = 8086 mode
   out 0xA1, al
   xor al, al
   out 0x80, al

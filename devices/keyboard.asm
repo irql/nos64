@@ -66,12 +66,18 @@ interrupt_keyboard:
             jmp .done
         .found_char:
           shr eax, 16
-          xor ah, ah
-          mov ah, 0x5f
-          mov [rdi], ax
-          add rdi, 2
-          call update_cursor
-          jmp .done
+
+          cmp al, 10 ; Special case for Return
+          jne .normal_char
+            call print_newline
+            jmp .done
+          .normal_char:
+            xor ah, ah
+            mov ah, 0x5f
+            mov [rdi], ax
+            add rdi, 2
+            call update_cursor
+            jmp .done
 
       .check_backsp:
       cmp dl, KEY_BACKSPACE
@@ -156,6 +162,7 @@ interrupt_keyboard:
     db 0x09, 0x89, '8', KEY_CHAR
     db 0x0a, 0x8a, '9', KEY_CHAR
     db 0x39, 0xb9, ' ', KEY_CHAR
+    db 0x1c, 0x9c,  10, KEY_CHAR
 
     db 0x1e, 0x9e, 'A', KEY_CHAR | KEY_SHIFT
     db 0x30, 0xb0, 'B', KEY_CHAR | KEY_SHIFT
@@ -183,7 +190,18 @@ interrupt_keyboard:
     db 0x2d, 0xad, 'X', KEY_CHAR | KEY_SHIFT
     db 0x15, 0x95, 'Y', KEY_CHAR | KEY_SHIFT
     db 0x2c, 0xac, 'Z', KEY_CHAR | KEY_SHIFT
+    db 0x0b, 0x8b, ')', KEY_CHAR | KEY_SHIFT
+    db 0x02, 0x82, '!', KEY_CHAR | KEY_SHIFT
+    db 0x03, 0x83, '@', KEY_CHAR | KEY_SHIFT
+    db 0x04, 0x84, '#', KEY_CHAR | KEY_SHIFT
+    db 0x05, 0x85, '$', KEY_CHAR | KEY_SHIFT
+    db 0x06, 0x86, '%', KEY_CHAR | KEY_SHIFT
+    db 0x07, 0x87, '^', KEY_CHAR | KEY_SHIFT
+    db 0x08, 0x88, '&', KEY_CHAR | KEY_SHIFT
+    db 0x09, 0x89, '*', KEY_CHAR | KEY_SHIFT
+    db 0x0a, 0x8a, '(', KEY_CHAR | KEY_SHIFT
     db 0x39, 0xb9, ' ', KEY_CHAR | KEY_SHIFT
+    db 0x1c, 0x9c,  10, KEY_CHAR | KEY_SHIFT
 
     db 0x0e, 0x8e,   0, KEY_BACKSPACE
     db 0x2a, 0xaa,   0, KEY_SHIFT
