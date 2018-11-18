@@ -1,7 +1,7 @@
 [bits 16]
 [org 0x7c00]
 
-SECTORS equ 6
+SECTORS equ 10
 RELOC equ 0x7c00
 MEM_MAP equ 0x7000
 MEM_MAP_LEN equ 0x6FF0
@@ -136,9 +136,27 @@ start:
 
 align 4
 GDT: ; Global Descriptor Table
-  dq 0
-  dq 0x00209A0000000000
-  dq 0x0000920000000000
+  .null:
+    dw 0xffff ; Limit(low)
+    dw 0      ; Base(low)
+    db 0      ; Base(mid)
+    db 0      ; Access
+    db 1      ; Granularity(limit(mid)+flags, both 4b)
+    db 0      ; Base(high)
+  .code:
+    dw 0
+    dw 0
+    db 0
+    db 10011010b ; Exec/read
+    db 10101111b ; 64 bits
+    db 0
+  .data:
+    dw 0
+    dw 0
+    db 0
+    db 10010010b ; read/write
+    db 0
+    db 0
   dw 0
 .pointer:
   dw $ - GDT - 1
@@ -185,9 +203,12 @@ landing64:
   mov bx, 0
   call update_cursor
 
-  mov rdi, 0xb8000
+  mov rdi, 0xB8000
   call memory_init
   call interrupt_init
+
+  ;xor rax, rax
+  ;div rax
 
   ;call dump_registers
   ;mov rdi, 0xB8000 + 0xA0 * 10
