@@ -1,4 +1,4 @@
-PRINT_DELAY              equ 0x10
+PRINT_DELAY              equ 1 ; 1 is equiv to no delay, 0x100000 is about 100ms
 video_memory             equ 0xB8000
 dump_registers_di_offset equ video_memory
 
@@ -170,7 +170,7 @@ _printhex:
           add al, 0x30
           mov ah, 0x5f
           stosw
-          call update_cursor
+          ;call update_cursor
           push rcx
             mov rcx, PRINT_DELAY
             .loop: nop

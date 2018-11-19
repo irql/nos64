@@ -32,6 +32,11 @@ interrupt_init:
     call interrupt_set
   loop .idte_set_loop
 
+  ; Set an ISR for the PIT
+  mov rbx, 0x20
+  mov rax, interrupt_pit_handler
+  call interrupt_set
+
   ; Remap the PIC prior to loading the IDT
 
   ; bl = master mask
@@ -88,9 +93,9 @@ interrupt_init:
   out 0xA1, al
 
   ; Mask PIT (disable everything but keyboard (IRQ=1, line=2)
-  in al, 0x21
-  or al, ~(2)
-  out 0x21, al
+  ;in al, 0x21
+  ;or al, ~(2)
+  ;out 0x21, al
 
   ; Load the IDT
   lidt [interrupt_idt_descriptor]
@@ -120,6 +125,24 @@ interrupt_set:
   pop rbx
   pop rdx
   ret
+
+interrupt_pit_handler:
+  push rax
+  push rdi
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov rdi, 0xb8000 + 124
+    mov rax, [.ticks]
+    call printhex64
+    inc qword [.ticks]
+    mov al, 0x20
+    out 0x20, al
+  pop rdi
+  pop rax
+  iretq
+  .ticks dq 0
 
 interrupt_common_handler:
   iretq
