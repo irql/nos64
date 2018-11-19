@@ -173,6 +173,7 @@ interrupt_keyboard:
     db 0x35, 0xb5, '/', KEY_CHAR
     db 0x29, 0xa9, '`', KEY_CHAR
     db 0x39, 0xb9, ' ', KEY_CHAR
+    ;db 0x0f, 0x8f, 09h, KEY_CHAR ; Tab (TODO special handling)
     db 0x1c, 0x9c,  10, KEY_CHAR
 
     db 0x1e, 0x9e, 'A', KEY_CHAR | KEY_SHIFT
