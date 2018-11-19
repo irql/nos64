@@ -11,6 +11,7 @@ memory_globals:
   .mem_size  dq 0
   .tbl_size  dq 0
   .free_base dq 0
+  .free_size dq 0
 
 PMEM_TBL_BASE equ memory_globals.mem_base
 PMEM_TBL_SIZE equ memory_globals.tbl_size
@@ -38,16 +39,22 @@ memory_init:
         mov [memory_globals.mem_base], r8
         mov [memory_globals.mem_size], r9
 
+        ; Calculate size of allocation table
         xor rdx, rdx
         mov rax, r9
         mov rbx, 256 * 64 ; Each bit in a qword corresponds to one 256 byte region
         div rbx
         mov [PMEM_TBL_SIZE], rax
 
-        ; free_mem_base is the start of memory following the allocation tables
+        ; free_base is the start of memory following the allocation table
         mov rcx, r8
         add rcx, rax
         mov [memory_globals.free_base], rcx
+
+        ; free_size is the amount of free memory minus the allocation table
+        mov rcx, r9
+        sub rcx, rax
+        mov [memory_globals.free_size], rcx
 
         mov rcx, rax
         xor rax, rax
@@ -61,7 +68,7 @@ memory_init:
           call printhex64
         mov rsi, .s_size
           call print64
-        mov rax, r9
+        mov rax, [memory_globals.free_size]
           call printhex64
         call print_newline
         ret

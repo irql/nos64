@@ -223,13 +223,8 @@ landing64:
   call memory_init
   call interrupt_init
   call keyboard_init
-
-  ;xor rax, rax
-  ;div rax
-
-  ;call dump_registers
-  ;mov rdi, 0xB8000 + 0xA0 * 10
-  ;call dump_memory
+  call print_newline
+  call dump_registers
 
   ;mov rcx, 0x5000000
   ;.1: loop .1

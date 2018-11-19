@@ -1,6 +1,6 @@
-PRINT_DELAY              equ 1 ; 1 is equiv to no delay, 0x100000 is about 100ms
+PRINT_DELAY              equ 0x100000 ; 1 is equiv to no delay, 0x100000 is about 100ms
 video_memory             equ 0xB8000
-dump_registers_di_offset equ video_memory
+dump_registers_di_offset equ video_memory + 0xA0 * 2
 
 ; Modifies rdi
 print_newline:
@@ -171,11 +171,11 @@ _printhex:
           mov ah, 0x5f
           stosw
           ;call update_cursor
-          push rcx
-            mov rcx, PRINT_DELAY
-            .loop: nop
-            loop .loop
-          pop rcx
+          ;push rcx
+          ;  mov rcx, PRINT_DELAY
+          ;  .loop: nop
+          ;  loop .loop
+          ;pop rcx
         pop ax
         shr al, 4
       loop .4
