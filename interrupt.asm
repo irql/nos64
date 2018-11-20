@@ -129,10 +129,6 @@ interrupt_set:
 interrupt_pit_handler:
   push rax
   push rdi
-    mov ax, 0x10
-    mov ds, ax
-    mov es, ax
-    mov ss, ax
     mov rdi, 0xb8000 + 124
     mov rax, [.ticks]
     call printhex64
