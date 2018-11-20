@@ -16,9 +16,9 @@ interrupt_keyboard:
     mov bl, al
 
     ; Uncomment to debug scan codes
-    ;call printhex8
-    ;add rdi, 2
-    ;jmp .done
+    call printhex8
+    add rdi, 2
+    jmp .done
 
     cld ; Scan forward, not backward
     mov rsi, .sc_table

@@ -18,7 +18,6 @@ Let's have fun! :-)
   - `memory_alloc` does not work when rcx (blocks requested) > 64
   - Crashes VirtualBox for some unknown reason
   - Crashes in QEMU when memory available > 2GB
-  - Keyboard driver doesn't support numpad (yet)
 
 #### High level todos
   - Select filesystem
@@ -31,4 +30,5 @@ Let's have fun! :-)
 #### Low-level todos
   - Write IDE/ATA driver for disk access (and determine what else is needed to these ends)
   - VGA support
+  - (med priority) keyboard driver doesn't support multi-byte scancodes
   - (low priority) Use APIC instead of 8295
