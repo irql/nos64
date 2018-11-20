@@ -212,12 +212,11 @@ landing64:
 
   ; Video memory is 0xB8FA0 - 0xB8000 = 0xFA0 = 80 * 25 * 2
   mov rdi, 0xB8000
-  mov rcx, 500
-  mov rax, 0x5f205f205f205f20 ; ' ' with purple background
-  rep stosq
-
   mov bx, 0
   call update_cursor
+  mov rcx, 500
+  mov rax, 0x0720072007200720 ; black BG, grey FG
+  rep stosq
 
   mov rdi, 0xB8000
   call memory_init

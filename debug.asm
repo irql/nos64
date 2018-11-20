@@ -1,6 +1,10 @@
-PRINT_DELAY              equ 0x100000 ; 1 is equiv to no delay, 0x100000 is about 100ms
+PRINT_DELAY              equ 1 ; 1 is equiv to no delay, 0x100000 is about 100ms
 video_memory             equ 0xB8000
 dump_registers_di_offset equ video_memory + 0xA0 * 2
+
+FG_COLOR equ 0x7 ; Grey
+BG_COLOR equ 0x0 ; Black
+COLOR equ (BG_COLOR << 4) | FG_COLOR
 
 ; Modifies rdi
 print_newline:
@@ -38,7 +42,7 @@ print64:
           call print_newline
           jmp .update_cursor
       .normal:
-      or ax, 0x5f00
+      or ax, COLOR << 8
       stosw
       push rcx
         mov rcx, PRINT_DELAY
@@ -69,7 +73,7 @@ update_cursor:
       push rax
       push rcx
         mov rcx, 2000
-        mov rax, 0x5f205f20
+        mov rax, (COLOR << 24) | (COLOR << 16) | 0x00200020
         rep stosd
       pop rcx
       pop rax
@@ -109,12 +113,12 @@ update_cursor:
 print_character_map:
   mov rdi, 0xB8000
   xor rax, rax
-  mov ax, 0x5f00
+  mov ax, (COLOR << 8)
   .2:
     stosw
   
     push ax
-      mov ax, 0x5f20
+      mov ax, (COLOR << 8) | 0x20
       stosw
     pop ax
   
@@ -123,7 +127,7 @@ print_character_map:
     pop ax
   
     push rax
-      mov eax, 0x5f205f20
+      mov eax, (COLOR << 24) | (COLOR << 8) | 0x200020
       stosd
     pop rax
   
@@ -134,13 +138,6 @@ print_character_map:
     cmp rdi, 0xB8F90
   jl .2
   
-  mov rax, 0x5f475f415f575f53
-  stosq
-  mov rax, 0x5f295f3a5f345f36
-  stosq
-  mov bx, 0x7CF
-    call update_cursor
-
   ret
 
 ; Used by the other printhex* calls
@@ -148,7 +145,7 @@ print_character_map:
 _printhex:
 
   push rax
-    mov eax, 0x5f785f30 ; '0x'
+    mov eax, (COLOR << 24) | (COLOR << 8) | 0x780030 ; '0x'
     stosd
   pop rax
 
@@ -168,7 +165,7 @@ _printhex:
             add al, 0x07
           .3:
           add al, 0x30
-          mov ah, 0x5f
+          mov ah, COLOR
           stosw
           ;call update_cursor
           ;push rcx

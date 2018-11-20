@@ -20,6 +20,7 @@ interrupt_keyboard:
     ;add rdi, 2
     ;jmp .done
 
+    cld ; Scan forward, not backward
     mov rsi, .sc_table
     mov rcx, .sc_tbl_length / 4
     .search_loop:
@@ -46,6 +47,8 @@ interrupt_keyboard:
         je .search_upper_loop
         cmp byte [.caps_state], 0xff
         jne .found_char
+        mov rsi, .sc_table
+        mov rcx, .sc_tbl_length / 4
           .search_upper_loop:
             lodsd
 
@@ -53,12 +56,47 @@ interrupt_keyboard:
             cmp al, bl
             jne .search_upper_next
 
-            ; Is it a shift key?
-            push rdx
-            mov edx, eax
-            shr edx, 24
-            cmp dl, KEY_CHAR | KEY_SHIFT
-            pop rdx
+            push bx
+              mov bl, KEY_CHAR | KEY_SHIFT
+
+              ; Is caps-lock on?
+              cmp byte [.caps_state], 0xff
+              jne .normal_behavior
+
+                ; If so, is shift also on?
+                cmp byte [.shift_state], 0xff
+                je .normal_behavior
+
+                  ; If it's only caps but not shift,
+                  ; we should only upper-case alphabetical
+                  ; keys.
+                  push rax
+                    shr eax, 16 ; Easier to compare the ASCII value
+                    xor dx, dx
+
+                    ; Don't mess with the modifier-comparator value
+                    ; if we're alredy on A-Z!
+                    cmp al, 'A'
+                    jl .nonAZ
+                    cmp al, 'Z'
+                    jle .isAZ
+
+                    .nonAZ:
+                    mov dl, KEY_CHAR
+                    cmp al, 'z'
+                    cmovg bx, dx
+                    cmp al, 'a'
+                    cmovl bx, dx
+
+                    .isAZ:
+                  pop rax
+
+              .normal_behavior:
+              ; Is it a shift key?
+              mov edx, eax
+              shr edx, 24
+              cmp dl, bl
+            pop bx
             je .found_char
 
             .search_upper_next:
@@ -73,7 +111,7 @@ interrupt_keyboard:
             jmp .done
           .normal_char:
             xor ah, ah
-            mov ah, 0x5f
+            mov ah, COLOR
             mov [rdi], ax
             add rdi, 2
             call update_cursor
@@ -83,7 +121,7 @@ interrupt_keyboard:
       cmp dl, KEY_BACKSPACE
       jne .check_shift
         sub rdi, 2
-        mov [rdi], word 0x5f20
+        mov [rdi], word (COLOR << 8) | 0x20
         call update_cursor
         jmp .done
 
