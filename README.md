@@ -18,6 +18,7 @@ Let's have fun! :-)
   - `memory_alloc` does not work when rcx (blocks requested) > 64
   - Crashes VirtualBox for some unknown reason
   - Crashes in QEMU when memory available > 2GB
+  - Keyboard driver doesn't support numpad (yet)
 
 #### High level todos
   - Select filesystem
