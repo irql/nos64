@@ -26,6 +26,8 @@ Let's have fun! :-)
   - More rugged debugging for kernel, possibly serial(w 8295 PIC)
   - IPC mechanism TBD
     - Interface for processes to subscribe to events, such as the keyboard
+  - preemptive MT verses cooperative MT?
+  - Resilliency like KeyKOS
 
 #### Low-level todos
   - Write IDE/ATA driver for disk access (and determine what else is needed to these ends)
