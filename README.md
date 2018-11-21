@@ -18,6 +18,7 @@ Let's have fun! :-)
   - `memory_alloc` does not work when rcx (blocks requested) > 64
   - Crashes VirtualBox for some unknown reason
   - Crashes in QEMU when memory available > 2GB
+  - Crashes on bare-metal somewhere in `memory_init` (maybe due to ACPI regions?)
 
 #### High level todos
   - Select filesystem
@@ -32,5 +33,6 @@ Let's have fun! :-)
 #### Low-level todos
   - Write IDE/ATA driver for disk access (and determine what else is needed to these ends)
   - VGA support
-  - (med priority) keyboard driver doesn't support multi-byte scancodes
+  - Keyboard driver should set LEDs depending on which lock(s) are active
+  - (med priority) keyboard driver doesn't support multi-byte scancodes (i.e. numpad, ctrl, arrows)
   - (low priority) Use APIC instead of 8295
